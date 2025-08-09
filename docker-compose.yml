@@ -1,0 +1,21 @@
+services:
+  api:
+    build: .
+    image: ghcr.io/vlamay/dockerized-api:dev
+    ports: ["8000:8000"]
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/app
+    depends_on:
+      mongo:
+        condition: service_healthy
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes: [ "mongodata:/data/db" ]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  mongodata:
